@@ -54,31 +54,31 @@ what do I know? I know nothing. At any rate, mTLS is good enough of a deal all
 things considered. AFAIK people these days no longer go around spreading
 unencrypted HTTP traffic like herpes.
 
-Okay, now let's imagine for a moment that we have network, we have discovery
-and whatnot, out nodes are well-connected and our services can talk to each
-other no problem. How do we get them on? Enter [Nomad][15]. From what I hear,
-people have had somwhat mixed experiences with it, but so they have with
-Kubernetes. I'm not too keen on gossip, and for this project would like to make
-decisions based on fact, that and simplicity, too. And judging from what I've
-read on the subject, Nomad seems like a decent enough scheduler, and [HCL][25]
-is a decent enough configuration language, which definitely seems like an
-improvement when put against the pages upon pages of YAML manifests commonly
-found in Kubernetes of all things.
+Okay, now let's imagine, for a moment, that we have our network, we have our
+discovery and whatnot, our nodes are well-connected, and our services can talk
+to each other consistently. How do we get them on? Enter [Nomad][15]. From what
+I hear, people have had somewhat mixed experiences with it, but so they have
+with Kubernetes. I'm not too keen on gossip, and for this project would like to
+make decisions based on simplicity and fact. Judging by what I've read on this
+subject, Nomad seems like a decent enough scheduler, and [HCL][25] is a decent
+enough configuration language, which would definitely seem like an improvement
+had you put it up against the pages upon pages of YAML manifests commonly found
+in Kubernetes of all things.
 
 Now, the big question is whether if we can make it work for us.
 
-I myself see no reason why it wouldn't, but let's consider our requirements for
-once. In a very broad sense, we're looking to schedule two kinds of workloads:
-the bandwidth-heavy user-facing API things, and them pesky QA/CI/CD things—
-various kinds of test and stage environments, observability and business
-intelligence software. In other words, services that we want to spin whenever
-we might need them, have them readily available and guarantee that they
-wouldn't suddenly impact our production deployment. The whole reason why we
-decided to push through the hybrid approach was to avoid serving traffic off
-AWS, and thus avoid paying for bandwidth of all things. We want to keep our
-databases, the cache, and everything— as close as possible to the traffic
-nodes, the primary disadvantage of it being that everything kind of clumps
-together to form a monolith monstrosity.
+I myself see no reason why it wouldn't, but this is no way to make an argument.
+Instead, let's consider our requirements for once. In a very broad sense, we're
+looking to schedule two kinds of workloads: the bandwidth-heavy user-facing API
+things and the pesky QA/CI/CD things— all kinds of test and stage environments,
+observability and business intelligence software. In other words, the services
+we would want to spin whenever we need them, have them readily available, and
+guarantee that they couldn't impact our production deployments all of a sudden.
+The very reason we decided to push through the _hybrid_ approach was to avoid
+serving traffic off AWS, and thus avoid paying the bandwidth bill. For this to
+work, we want to keep our databases, the cache, and everything— as close as
+possible to the traffic nodes, the primary disadvantage of this approach being
+that everything kind of clumps together to form a monolith monstrosity.
 
 Let's hope that Nomad can give us the necessary balance, because if it can't we
 would have to resort back to square zero— K8s, and no engineering success story
@@ -105,13 +105,13 @@ monolith-like API service written in Go. Now, at the end of the day, all this
 circus must go to town— and for that purpose we enjoy [Cloudflare Railgun][6]—
 a very particular piece of software, which functions as the ultimate solution
 to bandwidth optimisation, caching, and whatnot. That is, if you can afford a
-Business subscription in Cloudflare; and we can afford it, due to courtesy of
-[Project Galileo][7]. This means that we can set up a load balancer however we
-want, in fact it's very possible that we wouldn't need to, as the general load
+Cloudflare Business subscription; and due to courtesy of [Project Galileo][7]
+indeed we can. This means that we can set up a load balancer however we want,
+in fact it's very possible that we wouldn't need to, as the general load
 balancer is likely to be redundant in our case. In fact, we could as well rely
 on Cloudflare's [Load Balancer][8] directly, and make it spread the incoming
 traffic over two or more of our Hetzner boxes. And these two can be setup as to
-only accept Railgun requests from Cloudlfare subnets.
+only accept Railgun requests from the Cloudflare subnets.
 
 Thus we can expose our nice HA infrastructure nice and clean without seemingly
 having to expose it at all.
@@ -123,12 +123,13 @@ we can leverage Vault's [Auto Unseal][9] capability using [KMS][10] and rely on
 [S3][11] for object storage if we don't want to maintain the object store of
 our own, and we probably don't. Also, in order to keep the utilisation of these
 control plane VMs high, we can put some of our mission-critical services there.
-For the time being, we have the government-provided [ID][13] and bank acquring
-done within the API monolith, but there's room for improvement here: both may
-become separate services. In this view, none of it would ever come under load,
-of course as long as our Hetzner big-boys are able to consistently respond to
-pressure. At any rate, we're not looking at Google scale or anything, and would
-enjoy something like 10krpm. Also: Please remember all of it is Railgun-bound!
+For the time being, we have the government-provided [ID][13] and bank acquiring
+done within the API monolith, but there's room for improvement there: both may
+become independent services sometime along the way. In this view, none of them
+would ever come under load, of course as long as our Hetzner big-boys are able
+to consistently respond to pressure. At any rate, we're not looking at Google
+scale or anything; in fact, we would never exceed something like 10krpm. Also:
+Please remember all of it is Railgun-bound!
 
 I suggest we should seek simplicity if anything.
 
