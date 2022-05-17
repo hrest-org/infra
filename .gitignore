@@ -22,3 +22,9 @@ Icon
 ._*
 .vagrant/
 *.box
+
+# Terrafrom related
+/my.auto.tfvars
+.terraform/
+.terraform.tfstate.lock.info
+terraform.tfstate.backup

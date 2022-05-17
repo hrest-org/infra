@@ -1,0 +1,66 @@
+---
+
+variant: fcos
+version: 1.1.0
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ${public_key}
+
+storage:
+  files:
+    - path: /etc/hostname
+      overwrite: yes
+      mode: 420
+      contents:
+        inline: |
+          ${hostname}
+
+    # We disable SELinux, because it complicates the infrastructure
+    # configuration and maintaining without giving any feasible benefits for us
+    # (we're not going to operate in host OS except provisioning).
+    - path: /etc/selinux/config
+      overwrite: yes
+      mode: 420
+      contents:
+        inline: |
+          SELINUX=disabled
+          SELINUXTYPE=targeted
+
+systemd:
+  units:
+    # We're going to use `podman` only.
+    # See more explanations:
+    # https://docs.fedoraproject.org/en-US/fedora-coreos/faq/#_can_i_run_containers_via_docker_and_podman_at_the_same_time
+    - name: docker.service
+      enabled: no
+      mask: yes
+
+    # Consistent Network Device Naming assumes that you have a control over a
+    # physical hardware. For a cloud environment it has no benefits and makes
+    # network interfaces naming even less predictable.
+    - name: disable-ifnames.service
+      enabled: yes
+      contents: |
+        [Unit]
+        Description=Disable Consistent Network Device Naming
+        After=systemd-machine-id-commit.service
+        ConditionKernelCommandLine=!net.ifnames=0
+        ConditionPathExists=!/var/lib/disable-ifnames.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/rpm-ostree kargs --append 'net.ifnames=0'
+        ExecStart=/bin/touch /var/lib/disable-ifnames.stamp
+        ExecStart=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
+
+    # TODO: Configure Zincati for auto-updates
+    - name: zincati.service
+      enabled: no
+      mask: yes
