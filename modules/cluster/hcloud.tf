@@ -37,7 +37,10 @@ resource "hcloud_server" "node" {
 
   ssh_keys = [hcloud_ssh_key.bootstrap[0].id]
 
-  labels = merge(tomap({ cluster_name = var.cluster_name }), each.value.labels)
+  labels = merge(tomap({
+    cluster_name = var.cluster_name
+    node_name    = each.value.name
+  }), each.value.labels)
 
   connection {
     host        = hcloud_server.node[each.value.name].ipv4_address
