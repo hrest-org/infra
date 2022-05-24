@@ -33,3 +33,7 @@ module "cluster" {
     },
   ]
 }
+
+output "cluster_nodes" {
+  value = module.cluster.nodes
+}

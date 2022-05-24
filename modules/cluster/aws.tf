@@ -23,7 +23,7 @@ data "aws_ami" "fcos" {
   }
 }
 
-resource "aws_instance" "server" {
+resource "aws_instance" "node" {
   for_each = local.aws_nodes
 
   ami           = data.aws_ami.fcos.image_id
@@ -38,6 +38,10 @@ resource "aws_instance" "server" {
     cluster_name = var.cluster_name
     node_name    = each.value.name
   }), each.value.labels)
+
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 }
 
 resource "aws_security_group" "firewall" {
