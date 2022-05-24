@@ -28,7 +28,15 @@ The current high-level view of everything is as follows:
 - [Vault][16] keeps passwords, keys, certs, etc.— encrypted at rest.
 - [Postgres][17] with various extensions and [pgpool][18].
 - [Redis][5].
+- [Synapse][27] is a E2EE chat server with [OIDC][29] support.
 - [MapTiler][19] is a self-hosted tiling server.
+
+>Note: The API back-end we have engineered can act as an [OpenID Connect][28]
+provider, this is a means of authentication for our chat service that is a
+secure E2EE Matrix homeserver implementation, it also a means for the third
+parties to rely on us for authentication of applicants and volunteers. They
+want to do that in order to have extra anti-fraud and request deduplication
+capability.
 
 Let's first take a look at [Consul Reference Architecture][20] which should be
 a good starting point for all clusters based on Consul, and our case shouldn't
@@ -159,3 +167,6 @@ I suggest we should seek simplicity if anything.
 [24]: https://www.consul.io/docs/connect/connect-internals
 [25]: https://github.com/hashicorp/hcl
 [26]: https://www.cloudflare.com/waf
+[27]: https://github.com/matrix-org/synapse
+[28]: https://openid.net/connect/
+[29]: https://matrix-org.github.io/synapse/latest/openid.html
