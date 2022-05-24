@@ -1,0 +1,59 @@
+---
+
+variant: fcos
+version: 1.4.0  # https://coreos.github.io/butane/config-fcos-v1_4
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ${public_key}
+
+kernel_arguments:
+  # Consistent Network Device Naming assumes that you have a control over a
+  # physical hardware. For a cloud environment it has no benefits and makes
+  # network interfaces naming even less predictable.
+  should_exist:
+    - net.ifnames=0
+  should_not_exist:
+    - net.ifnames=1
+
+
+storage:
+  files:
+    - path: /etc/hostname
+      overwrite: yes
+      mode: 420
+      contents:
+        inline: |
+          ${hostname}
+
+    # We disable SELinux, because it complicates the infrastructure
+    # configuration and maintaining without giving any feasible benefits for us
+    # (we're not going to operate in host OS except provisioning).
+    - path: /etc/selinux/config
+      overwrite: yes
+      mode: 420
+      contents:
+        inline: |
+          SELINUX=disabled
+          SELINUXTYPE=targeted
+
+systemd:
+  units:
+    # We're going to use `podman` only.
+    # See more explanations:
+    # https://docs.fedoraproject.org/en-US/fedora-coreosfaq#_can_i_run_containers_via_docker_and_podman_at_the_same_time
+    - name: docker.service
+      enabled: no
+      mask: yes
+
+    # By default FCOS uses UTC time zone:
+    # https://docs.fedoraproject.org/en-US/fedora-coreos/time-zone
+    - name: chronyd.service
+      enabled: yes
+
+    # TODO: Configure Zincati for auto-updates
+    - name: zincati.service
+      enabled: no
+      mask: yes
