@@ -1,3 +1,5 @@
+# Input variables of "cluster" module.
+
 variable "cluster_name" {
   description = "Name of this cluster"
 }

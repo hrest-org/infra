@@ -1,3 +1,8 @@
+# Butane/Ignition config preparing for Fedora CoreOS provisioning.
+# See details: https://coreos.github.io/butane
+
+# TODO: https://github.com/hashicorp/terraform-provider-cloudinit
+
 data "ct_config" "ignition" {
   for_each = local.all_nodes
 
