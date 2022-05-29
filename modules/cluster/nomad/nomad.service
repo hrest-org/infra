@@ -1,5 +1,5 @@
 [Unit]
-Description=Nomad server
+Description=Nomad agent
 Wants=network-online.target
 After=network-online.target
 

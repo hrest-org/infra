@@ -9,7 +9,8 @@ variable "cluster_nodes" {
     name       = string
     provider   = string
     type       = string
-    location   = string
+    datacenter = string  # https://nomadproject.io/docs/internals/architecture#datacenters
+    region     = string  # https://nomadproject.io/docs/internals/architecture#regions
     public_key = string
     labels     = map(string)
   }))

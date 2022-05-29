@@ -1,6 +1,6 @@
-name = "rrr"
-datacenter = "dc1"  # TODO
-region = "fmfmf"    # TODO
+name = "${node.name}"
+datacenter = "${node.datacenter}"
+region = "${node.region}"
 
 log_level = "INFO"
 log_json = true
@@ -16,8 +16,15 @@ advertise {
 }
 */
 
+%{ if try(node.labels["nomad/server"], false) ~}
 server {
-  enabled = true
+  enabled          = true
   bootstrap_expect = server_count
 }
+%{~ endif }
 
+%{ if try(node.labels["nomad/client"], false) ~}
+client {
+  enabled = true
+}
+%{~ endif }

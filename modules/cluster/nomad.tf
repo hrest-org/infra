@@ -9,6 +9,7 @@ resource "null_resource" "install_nomad" {
     aws_instance.node,
     hcloud_server.node,
     null_resource.rpm_packages,
+    null_resource.install_consul,
   ]
 
   for_each = local.provisioned_nodes
@@ -28,7 +29,9 @@ resource "null_resource" "install_nomad" {
 
   # Prepare Nomad config.
   provisioner "file" {
-    content     = templatefile("${path.module}/nomad/conf.hcl", {})
+    content     = templatefile("${path.module}/nomad/conf.hcl.tftpl", {
+      node = each.value
+    })
     destination = "/tmp/nomad.conf.hcl"
   }
 

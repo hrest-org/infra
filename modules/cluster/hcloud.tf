@@ -29,7 +29,7 @@ resource "hcloud_server" "node" {
 
   name        = each.value.name
   server_type = each.value.type
-  location    = each.value.location
+  location    = each.value.datacenter
 
   # There is no prepared FCOS image for Hetzner Cloud,
   # that's why we choose whatever image and install FCOS in rescue mode.

@@ -1,0 +1,10 @@
+datacenter = "${node.region}"
+
+log_level = "INFO"
+log_json = true
+
+data_dir = "/var/lib/consul/"
+
+%{ if try(node.labels["consul/server"], false) ~}
+server = true
+%{~ endif }
