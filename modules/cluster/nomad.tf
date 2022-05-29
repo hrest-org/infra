@@ -5,7 +5,11 @@ locals {
 }
 
 resource "null_resource" "install_nomad" {
-  depends_on = [aws_instance.node, hcloud_server.node]
+  depends_on = [
+    aws_instance.node,
+    hcloud_server.node,
+    null_resource.rpm_packages,
+  ]
 
   for_each = local.provisioned_nodes
 
@@ -14,15 +18,6 @@ resource "null_resource" "install_nomad" {
     user        = "core"
     private_key = file("~/Job/tmp.key")  # TODO: manage secret properly
     timeout     = "5m"
-  }
-
-  # Install zip tool.
-  provisioner "remote-exec" {
-    inline = [
-      "set -x -o errexit",
-      "sudo rpm-ostree install --idempotent zip",
-      "sudo shutdown -r +1",  # required due to layering of `rpm-ostree`
-    ]
   }
 
   # Prepare Nomad systemd service.

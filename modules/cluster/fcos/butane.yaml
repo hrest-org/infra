@@ -53,7 +53,7 @@ systemd:
     - name: chronyd.service
       enabled: yes
 
-    # TODO: Configure Zincati for auto-updates
+    # TODO: Configure Zincati for auto-updates.
     - name: zincati.service
       enabled: no
       mask: yes
