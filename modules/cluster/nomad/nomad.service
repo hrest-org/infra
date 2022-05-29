@@ -9,7 +9,7 @@ After=network-online.target
 Environment="VAULT_TOKEN=replace_vault_token"
 
 ExecStartPre=/usr/bin/mkdir -p /var/lib/nomad/
-ExecStart=/usr/local/bin/nomad agent -config /root/server.hcl
+ExecStart=/usr/local/bin/nomad agent -config /etc/nomad/conf.hcl
 
 # Omit OOM killer if possible.
 OOMScoreAdjust=-999

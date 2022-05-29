@@ -51,15 +51,11 @@ resource "hcloud_server" "node" {
   }
 
   provisioner "file" {
-    when = create
-
     content     = data.ct_config.ignition[each.value.name].rendered
     destination = "/root/ignition.json"
   }
 
   provisioner "remote-exec" {
-    when = create
-
     inline = [
       "set -x -o errexit",
       "update-alternatives --set iptables /usr/sbin/iptables-legacy",

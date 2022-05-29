@@ -13,32 +13,51 @@ resource "null_resource" "install_nomad" {
     host        = each.value.ipv4
     user        = "core"
     private_key = file("~/Job/tmp.key")  # TODO: manage secret properly
+    timeout     = "5m"
   }
 
-  # Install Nomad systemd service.
-  provisioner "file" {
-    source      = templatefile("${path.module}/nomad/nomad.service", {})
-    destination = "/etc/systemd/system/nomad.service"
-  }
-
-  # Install Nomad server config.
-  provisioner "file" {
-    source      = templatefile("${path.module}/nomad/server.hcl", {})
-    destination = "/etc/nomad/server.hcl"
-  }
-
-  # Install Nomad binary and start.
+  # Install zip tool.
   provisioner "remote-exec" {
     inline = [
       "set -x -o errexit",
+      "sudo rpm-ostree install --idempotent zip",
+      "sudo shutdown -r +1",  # required due to layering of `rpm-ostree`
+    ]
+  }
+
+  # Prepare Nomad systemd service.
+  provisioner "file" {
+    content     = templatefile("${path.module}/nomad/nomad.service", {})
+    destination = "/tmp/nomad.service"
+  }
+
+  # Prepare Nomad config.
+  provisioner "file" {
+    content     = templatefile("${path.module}/nomad/conf.hcl", {})
+    destination = "/tmp/nomad.conf.hcl"
+  }
+
+  # Install Nomad binary and start Nomad as systemd service.
+  provisioner "remote-exec" {
+    inline = [
+      "set -x -o errexit",
+
+      "sudo rm -rf /tmp/nomad",
       "mkdir -p /tmp/nomad/",
+
       "curl -fL -o /tmp/nomad/nomad.zip https://releases.hashicorp.com/nomad/${local.nomad_ver}/nomad_${local.nomad_ver}_linux_amd64.zip",
       "unzip /tmp/nomad/nomad.zip -d /tmp/nomad/",
-      "cp -f /tmp/nomad/nomad /usr/local/bin/",
-      "rm -rf /tmp/nomad",
-      "systemctl daemon-reload",
-      "systemctl enable nomad.service",
-      "systemctl restart nomad.service",
+      "sudo cp -f /tmp/nomad/nomad /usr/local/bin/",
+
+      "sudo mkdir -p /etc/nomad/",
+      "sudo cp -f /tmp/nomad.conf.hcl /etc/nomad/conf.hcl",
+
+      "sudo cp -f /tmp/nomad.service /etc/systemd/system/nomad.service",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable nomad.service",
+      "sudo systemctl restart nomad.service",
+
+      "sudo rm -rf /tmp/nomad /tmp/nomad.*",
     ]
   }
 }
