@@ -1,0 +1,19 @@
+[Unit]
+Description=Consul agent
+Wants=network-online.target
+After=network-online.target
+
+
+[Service]
+ExecStartPre=/usr/bin/mkdir -p /var/lib/consul/
+ExecStart=/usr/local/bin/consul agent -config-file /etc/consul/conf.hcl
+
+# Omit OOM killer if possible.
+OOMScoreAdjust=-999
+
+Restart=always
+RestartSec=10
+
+
+[Install]
+WantedBy=multi-user.target

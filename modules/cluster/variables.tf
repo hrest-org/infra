@@ -1,3 +1,5 @@
+# Input variables of "cluster" module.
+
 variable "cluster_name" {
   description = "Name of this cluster"
 }
@@ -7,7 +9,8 @@ variable "cluster_nodes" {
     name       = string
     provider   = string
     type       = string
-    location   = string
+    datacenter = string  # https://nomadproject.io/docs/internals/architecture#datacenters
+    region     = string  # https://nomadproject.io/docs/internals/architecture#regions
     public_key = string
     labels     = map(string)
   }))

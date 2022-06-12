@@ -1,3 +1,5 @@
+# Dependencies of "cluster" module.
+
 terraform {
   required_providers {
     aws = {

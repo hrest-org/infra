@@ -19,17 +19,24 @@ module "cluster" {
       name       = "test.node"
       provider   = "hcloud"
       type       = "cx21"
-      location   = "nbg1"
+      datacenter = "nbg1"
+      region     = "german"
       public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOc1R31qal9hTojZJnKR0E1/eVVy+eoxm09OxMmBK0Og"
-      labels     = {}
+      labels = {
+        "nomad/client" = true,
+      }
     },
     {
       name       = "test2.node"
       provider   = "aws"
       type       = "t2.micro"
-      location   = data.aws_region.current.name
+      datacenter = data.aws_region.current.name
+      region     = "german"
       public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOc1R31qal9hTojZJnKR0E1/eVVy+eoxm09OxMmBK0Og"
-      labels     = {}
+      labels = {
+        "consul/server" = true,
+        "nomad/server"  = true,
+      }
     },
   ]
 }
