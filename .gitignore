@@ -20,11 +20,12 @@ temp/
 .LSOverride
 Icon
 ._*
-.vagrant/
+.vagrant/k
 *.box
 
 # Terrafrom related
 /my.auto.tfvars
 .terraform/
-.terraform.tfstate.lock.info
-terraform.tfstate.backup
+/.terraform.tfstate.lock.info
+/terraform.tfstate
+/terraform.tfstate.backup

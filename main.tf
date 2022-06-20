@@ -1,3 +1,13 @@
+terraform {
+  backend "s3" {
+    # NOTE: Amazon S3 bucket names must be unique globally (among all users).
+    # https://docs.aws.amazon.com/AmazonS3/latest/userguide/BucketRestrictions.html#bucketnamingrules
+    bucket = "tfstate-test-rnadflj43jn0jns5e"
+    key    = ".tfstate"
+    region = "eu-central-1"
+  }
+}
+
 provider "aws" {
   region     = "eu-central-1"
   access_key = var.aws_access_key

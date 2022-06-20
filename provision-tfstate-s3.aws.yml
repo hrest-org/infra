@@ -1,0 +1,12 @@
+Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Delete  # Retain
+    Properties:
+      BucketName:
+        Ref: BucketName
+
+Parameters:
+  BucketName:
+    Description: Name of the S3 bucket to store Terraform state in
+    Type: String
