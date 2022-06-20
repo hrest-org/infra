@@ -1,3 +1,14 @@
+###############################
+# Common defaults/definitions #
+###############################
+
+# Checks two given strings for equality.
+eq = $(if $(or $(1),$(2)),$(and $(findstring $(1),$(2)),\
+                                $(findstring $(2),$(1))),1)
+
+
+
+
 ######################
 # Project parameters #
 ######################
@@ -34,6 +45,17 @@ endif
 
 
 
+#####################
+# System parameters #
+#####################
+
+CURRENT_OS = $(strip \
+	$(if $(call eq,$(OS),Windows_NT),windows,\
+	$(if $(call eq,$(shell uname -s),Darwin),macos,linux)))
+
+
+
+
 ############################
 # Terraform state commands #
 ############################
@@ -46,6 +68,13 @@ endif
 #	make tfstate.s3 [state=(present|view|absent)] [bucket=<name>]
 
 tfstate.s3:
+ifeq ($(strip $(shell which aws)),)
+ifeq ($(CURRENT_OS),macos)
+	brew install awscli
+else
+	$(error "`aws` CLI tool must be installed. See: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions")
+endif
+endif
 ifeq ($(or $(state),present),present)
 	aws cloudformation create-stack --stack-name tfstate-$(CLUSTER) \
 		--template-body file://provision-tfstate-s3.aws.yml \
@@ -54,7 +83,11 @@ ifeq ($(or $(state),present),present)
 			     $(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2)))
 else
 ifeq ($(state),absent)
+ifeq ($(strip $(shell stty -echo; read -p "Confirm deletion of remote Terraform state (yes/no): " input; \
+                      stty echo; echo $$input)),yes)
+	@echo ""
 	aws cloudformation delete-stack --stack-name tfstate-$(CLUSTER)
+endif
 else
 	aws cloudformation describe-stack-events --stack-name tfstate-$(CLUSTER)
 endif
