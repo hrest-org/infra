@@ -6,6 +6,9 @@
 eq = $(if $(or $(1),$(2)),$(and $(findstring $(1),$(2)),\
                                 $(findstring $(2),$(1))),1)
 
+# Prompts for the user input with a message.
+prompt = $(strip $(shell stty -echo; read -p $(1) inp; stty echo; echo $$inp))
+
 
 
 
@@ -27,14 +30,12 @@ ifneq ($(findstring tfstate.s3,$(MAKECMDGOALS)),)
 ifeq ($(strip $(AWS_ACCESS_KEY_ID)),)
 export AWS_ACCESS_KEY_ID=$(strip \
 	$(or $(shell grep -m1 'aws_access_key = "' my.auto.tfvars | cut -d'"' -f2),\
-	     $(shell stty -echo; read -p "AWS_ACCESS_KEY_ID: " input; \
-	             stty echo; echo $$input)))
+	     $(call prompt,"AWS_ACCESS_KEY_ID: ")))
 endif
 ifeq ($(strip $(AWS_SECRET_ACCESS_KEY)),)
 export AWS_SECRET_ACCESS_KEY=$(strip \
 	$(or $(shell grep -m1 'aws_secret_key = "' my.auto.tfvars | cut -d'"' -f2),\
-	     $(shell stty -echo; read -p "AWS_SECRET_ACCESS_KEY: " input; \
-	             stty echo; echo $$input)))
+	     $(call prompt,"AWS_SECRET_ACCESS_KEY: ")))
 endif
 ifeq ($(strip $(AWS_DEFAULT_REGION)),)
 export AWS_DEFAULT_REGION=$(strip \
@@ -83,8 +84,7 @@ ifeq ($(or $(state),present),present)
 			     $(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2)))
 else
 ifeq ($(state),absent)
-ifeq ($(strip $(shell stty -echo; read -p "Confirm deletion of remote Terraform state (yes/no): " input; \
-                      stty echo; echo $$input)),yes)
+ifeq ($(call prompt,"Confirm deletion of remote Terraform state (yes/no): "),yes)
 	@echo ""
 	aws cloudformation delete-stack --stack-name tfstate-$(CLUSTER)
 endif
