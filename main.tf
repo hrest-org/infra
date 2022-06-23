@@ -21,12 +21,10 @@ provider "aws" {
   region = "eu-central-1"
 }
 
-data "aws_region" "current" {}
-
 # Requires `HCLOUD_TOKEN` env var to be set.
-provider "hcloud" {
-  token = var.hcloud_token
-}
+provider "hcloud" {}
+
+data "aws_region" "current" {}
 
 module "cluster" {
   source = "./modules/cluster"
