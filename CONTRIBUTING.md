@@ -3,6 +3,7 @@ Contribution Guide
 
 1. [Prerequisites](#prerequisites)
 2. [Operations](#operations)
+3. [Code style](#code-style)
 
 
 
@@ -41,6 +42,16 @@ make tfstate.s3               # to provision S3 bucket and DynamoDB table
 make tfstate.s3 state=view    # to track the creation process via AWS events
 make tfstate.s3 state=absent  # to remove remote Terraform state completely
 ```
+
+
+
+
+## Code style
+
+
+### Secrets management
+
+Storing [Terraform] state remotely and encrypted in an [S3 bucket][2] allows to generate infrastructure secrets and credentials on-fly and store them in a [Terraform] state without being exposed.
 
 
 
