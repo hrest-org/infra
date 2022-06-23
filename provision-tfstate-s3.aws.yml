@@ -1,12 +1,44 @@
 Resources:
-  S3Bucket:
-    Type: 'AWS::S3::Bucket'
-    DeletionPolicy: Delete  # Retain
+  Store:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
     Properties:
       BucketName:
         Ref: BucketName
+      # Avoid deletion or overwriting.
+      # https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html
+      ObjectLockConfiguration:
+        ObjectLockEnabled: Enabled
+      # Ability to roll back to an older version if something goes wrong.
+      # https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: S3 remote Terraform state store
+  LockTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    Properties:
+      TableName:
+        Ref: DynamoDbTable
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      Tags:
+        - Key: Name
+          Value: DynamoDB Terraform state lock table
 
 Parameters:
   BucketName:
     Description: Name of the S3 bucket to store Terraform state in
+    Type: String
+  DynamoDbTable:
+    Description: Name of the DynamoDB table to use for locking Terraform state
     Type: String

@@ -23,8 +23,10 @@ Icon
 .vagrant/k
 *.box
 
+# Personal stuff
+/.my.env
+
 # Terrafrom related
-/my.auto.tfvars
 .terraform/
 /.terraform.tfstate.lock.info
 /terraform.tfstate

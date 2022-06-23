@@ -29,12 +29,12 @@ CLUSTER ?= $(strip \
 ifneq ($(findstring tfstate.s3,$(MAKECMDGOALS)),)
 ifeq ($(strip $(AWS_ACCESS_KEY_ID)),)
 export AWS_ACCESS_KEY_ID=$(strip \
-	$(or $(shell grep -m1 'aws_access_key = "' my.auto.tfvars | cut -d'"' -f2),\
+	$(or $(shell grep -m1 'AWS_ACCESS_KEY_ID=' .my.env | cut -d'=' -f2),\
 	     $(call prompt,"AWS_ACCESS_KEY_ID: ")))
 endif
 ifeq ($(strip $(AWS_SECRET_ACCESS_KEY)),)
 export AWS_SECRET_ACCESS_KEY=$(strip \
-	$(or $(shell grep -m1 'aws_secret_key = "' my.auto.tfvars | cut -d'"' -f2),\
+	$(or $(shell grep -m1 'AWS_SECRET_ACCESS_KEY=' .my.env | cut -d'=' -f2),\
 	     $(call prompt,"AWS_SECRET_ACCESS_KEY: ")))
 endif
 ifeq ($(strip $(AWS_DEFAULT_REGION)),)
@@ -66,7 +66,9 @@ CURRENT_OS = $(strip \
 # See `provision-tfstate-s3.aws.yml` for the detailed spec.
 #
 # Usage:
-#	make tfstate.s3 [state=(present|view|absent)] [bucket=<name>]
+#	make tfstate.s3 [state=(present|view|absent)]
+#	                [bucket=<name>]
+#	                [dynamodb_table=<name>]
 
 tfstate.s3:
 ifeq ($(strip $(shell which aws)),)
@@ -79,9 +81,14 @@ endif
 ifeq ($(or $(state),present),present)
 	aws cloudformation create-stack --stack-name tfstate-$(CLUSTER) \
 		--template-body file://provision-tfstate-s3.aws.yml \
-		--parameters ParameterKey=BucketName,ParameterValue=$(strip \
-			$(or $(bucket),\
-			     $(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2)))
+		--parameters \
+			ParameterKey=BucketName,ParameterValue=$(strip \
+				$(or $(bucket),\
+				     $(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2))) \
+			ParameterKey=DynamoDbTable,ParameterValue=$(strip \
+				$(or $(dynamodb_table),\
+				     $(shell grep -m1 'dynamodb_table = "' main.tf \
+				             | cut -d'"' -f2)))
 else
 ifeq ($(state),absent)
 ifeq ($(call prompt,"Confirm deletion of remote Terraform state (yes/no): "),yes)
