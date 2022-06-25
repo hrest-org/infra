@@ -8,7 +8,6 @@ variable "cluster_nodes" {
     provider   = string
     type       = string
     location   = string
-    public_key = string
     labels     = map(string)
   }))
   description = "Nodes of this cluster and their settings"
