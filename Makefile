@@ -70,6 +70,11 @@ CURRENT_OS = $(strip \
 #	                [bucket=<name>]
 #	                [dynamodb_table=<name>]
 
+tfstate-s3-bucket = $(strip $(or $(bucket),\
+	$(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2)))
+tfstate-s3-dynamodb = $(strip $(or $(dynamodb_table),\
+	$(shell grep -m1 'dynamodb_table = "' main.tf | cut -d'"' -f2)))
+
 tfstate.s3:
 ifeq ($(strip $(shell which aws)),)
 ifeq ($(CURRENT_OS),macos)
@@ -82,17 +87,21 @@ ifeq ($(or $(state),present),present)
 	aws cloudformation create-stack --stack-name tfstate-$(CLUSTER) \
 		--template-body file://provision-tfstate-s3.aws.yml \
 		--parameters \
-			ParameterKey=BucketName,ParameterValue=$(strip \
-				$(or $(bucket),\
-				     $(shell grep -m1 'bucket = "' main.tf | cut -d'"' -f2))) \
-			ParameterKey=DynamoDbTable,ParameterValue=$(strip \
-				$(or $(dynamodb_table),\
-				     $(shell grep -m1 'dynamodb_table = "' main.tf \
-				             | cut -d'"' -f2)))
+			ParameterKey=BucketName,ParameterValue=$(tfstate-s3-bucket) \
+			ParameterKey=DynamoDbTable,ParameterValue=$(tfstate-s3-dynamodb)
 else
 ifeq ($(state),absent)
 ifeq ($(call prompt,"Confirm deletion of remote Terraform state (yes/no): "),yes)
 	@echo ""
+ifneq ($(strip $(shell aws s3api list-object-versions \
+                                 --bucket $(tfstate-s3-bucket) \
+                                 --output=json --query='*[].{Key:Key}')),[])
+	aws s3api delete-objects --bucket $(tfstate-s3-bucket) --delete \
+		"$$(aws s3api list-object-versions --bucket $(tfstate-s3-bucket) \
+		              --output=json \
+		              --query='{Objects: *[].{Key:Key,VersionId:VersionId}}')" \
+		--no-paginate
+endif
 	aws cloudformation delete-stack --stack-name tfstate-$(CLUSTER)
 endif
 else
