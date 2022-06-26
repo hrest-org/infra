@@ -1,3 +1,5 @@
+# Provisioning of Hetzner Cloud cluster nodes with Fedora CoreOS installed.
+
 locals {
   hcloud_nodes = {
     for n in var.cluster_nodes: n.name => n if n.provider == "hcloud"
@@ -44,20 +46,16 @@ resource "hcloud_server" "node" {
 
   connection {
     host        = hcloud_server.node[each.value.name].ipv4_address
-    timeout     = "5m"
     private_key = tls_private_key.hcloud_bootstrap[0].private_key_pem
+    timeout     = "5m"
   }
 
   provisioner "file" {
-    when = create
-
     content     = data.ct_config.ignition[each.value.name].rendered
     destination = "/root/ignition.json"
   }
 
   provisioner "remote-exec" {
-    when = create
-
     inline = [
       "set -x -o errexit",
       "update-alternatives --set iptables /usr/sbin/iptables-legacy",

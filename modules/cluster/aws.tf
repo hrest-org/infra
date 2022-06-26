@@ -1,3 +1,5 @@
+# Provisioning of AWS cluster nodes with Fedora CoreOS installed.
+
 locals {
   aws_nodes = {
     for n in var.cluster_nodes: n.name => n if n.provider == "aws"

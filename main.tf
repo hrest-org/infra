@@ -36,7 +36,6 @@ module "cluster" {
       provider   = "hcloud"
       type       = "cx21"
       location   = "nbg1"
-      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOc1R31qal9hTojZJnKR0E1/eVVy+eoxm09OxMmBK0Og"
       labels     = {}
     },
     {
@@ -44,7 +43,6 @@ module "cluster" {
       provider   = "aws"
       type       = "t2.micro"
       location   = data.aws_region.current.name
-      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOc1R31qal9hTojZJnKR0E1/eVVy+eoxm09OxMmBK0Og"
       labels     = {}
     },
   ]
