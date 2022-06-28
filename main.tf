@@ -35,15 +35,19 @@ module "cluster" {
       name       = "test.node"
       provider   = "hcloud"
       type       = "cx21"
-      location   = "nbg1"
-      labels     = {}
+      datacenter = "nbg1"
+      region     = "german"
+      labels = {}
     },
     {
       name       = "test2.node"
       provider   = "aws"
       type       = "t2.micro"
-      location   = data.aws_region.current.name
-      labels     = {}
+      datacenter = data.aws_region.current.name
+      region     = "german"
+      labels = {
+        "vault/server" = true
+      }
     },
   ]
 }

@@ -1,0 +1,24 @@
+[Unit]
+Description=Vault server
+Wants=network-online.target
+After=network-online.target
+
+
+[Service]
+Type=notify
+
+ExecStartPre=/usr/bin/mkdir -p /var/lib/vault/data/
+ExecStart=/usr/local/bin/vault server -config-file /etc/vault/conf.hcl
+
+# https://vaultproject.io/docs/configuration#disable_mlock
+LimitMEMLOCK=infinity
+
+# Omit OOM killer if possible.
+OOMScoreAdjust=-999
+
+Restart=always
+RestartSec=10
+
+
+[Install]
+WantedBy=multi-user.target

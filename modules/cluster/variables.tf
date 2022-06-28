@@ -6,11 +6,12 @@ variable "cluster_name" {
 
 variable "cluster_nodes" {
   type = list(object({
-    name     = string
-    provider = string
-    type     = string
-    location = string
-    labels   = map(string)
+    name       = string
+    provider   = string
+    type       = string
+    datacenter = string  # https://nomadproject.io/docs/internals/architecture#datacenters
+    region     = string  # https://nomadproject.io/docs/internals/architecture#regions
+    labels     = map(string)
   }))
   description = "Nodes of this cluster and their settings"
 }
