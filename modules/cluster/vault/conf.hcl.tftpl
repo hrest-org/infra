@@ -1,0 +1,51 @@
+# https://vaultproject.io/docs/configuration
+
+# https://vaultproject.io/docs/configuration#api_addr
+api_addr = "https://${node.ipv4}:8200"
+
+# https://vaultproject.io/docs/configuration#cluster_addr
+cluster_addr = "https://${node.ipv4}:8201"
+
+# https://vaultproject.io/docs/configuration/listener/tcp#tcp-listener-parameters
+listener "tcp" {
+  address         = "0.0.0.0:8200"
+  cluster_address = "0.0.0.0:8201"
+
+  tls_disable = true
+
+  tls_cert_file   = "/etc/vault/tls.crt"
+  tls_key_file    = "/etc/vault/tls.key"
+  tls_min_version = "tls13"
+
+  tls_require_and_verify_client_cert = true
+  tls_client_ca_file                 = "/etc/vault/ca.crt"
+}
+
+# https://vaultproject.io/docs/configuration#disable_mlock
+disable_mlock = true
+
+# https://vaultproject.io/docs/configuration/storage/raft#integrated-storage-raft-backend
+storage "raft" {
+  path = "/var/lib/vault/data/"
+
+  node_id = "${node.name}"
+
+%{ for leader_name, leader_ipv4 in leaders }
+  retry_join {
+    leader_tls_servername   = "${leader_name}"
+    leader_api_addr         = "https://${leader_ipv4}:8200"
+    leader_ca_cert_file     = "/etc/vault/ca.crt"
+    leader_client_cert_file = "/etc/vault/tls.crt"
+    leader_client_key_file  = "/etc/vault/tls.key"
+  }
+%{ endfor ~}
+}
+
+# https://vaultproject.io/docs/configuration/seal/awskms#awskms-seal
+seal "awskms" {
+  region     = "${node.region}"
+  kms_key_id = "${unseal_key_arn}"
+
+  access_key = "${aws_access_key}"
+  secret_key = "${aws_secret_key}"
+}

@@ -62,6 +62,25 @@ resource "aws_security_group" "firewall" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
+  ingress {
+    description = "Vault client port"
+
+    from_port        = 8200
+    to_port          = 8200
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  ingress {
+    description = "Vault peer port"
+
+    from_port        = 8201
+    to_port          = 8201
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
   tags = {
     cluster_name = var.cluster_name
   }
